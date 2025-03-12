@@ -1,17 +1,17 @@
 import '~/global.scss'
 
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
+import { PortalHost } from '@rn-primitives/portal'
+import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
+import { useEffect } from 'react'
 import { Platform } from 'react-native'
-import { NAV_THEME } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
-import { PortalHost } from '@rn-primitives/portal'
 import { ThemeToggle } from '~/components/ThemeToggle'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
-import { useFonts } from 'expo-font'
-import { useEffect } from 'react'
+import { NAV_THEME } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -27,7 +27,7 @@ export {
   ErrorBoundary,
 } from 'expo-router'
 
-export default function RootLayout() {
+function RootLayout() {
   const [loaded] = useFonts({
     'Jakarta-Bold': require('../assets/fonts/PlusJakartaSans-Bold.ttf'),
     'Jakarta-ExtraBold': require('../assets/fonts/PlusJakartaSans-ExtraBold.ttf'),
@@ -55,20 +55,6 @@ export default function RootLayout() {
     }
   }, [loaded, colorScheme])
 
-  useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current) {
-      return
-    }
-
-    if (Platform.OS === 'web') {
-      // Adds the background color to the html element to prevent white background on overscroll.
-      document.documentElement.classList.add('bg-background')
-    }
-    setAndroidNavigationBar(colorScheme)
-    setIsColorSchemeLoaded(true)
-    hasMounted.current = true
-  }, [])
-
   if (!loaded || !isColorSchemeLoaded) {
     return null
   }
@@ -78,9 +64,23 @@ export default function RootLayout() {
       <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
       <Stack>
         <Stack.Screen
-          name='index'
+          name="index"
           options={{
-            title: 'Starter Base',
+            title: 'Index',
+            headerRight: () => <ThemeToggle />,
+          }}
+        />
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            title: 'Auth',
+            headerRight: () => <ThemeToggle />,
+          }}
+        />
+        <Stack.Screen
+          name="(root)"
+          options={{
+            title: 'Root',
             headerRight: () => <ThemeToggle />,
           }}
         />
@@ -90,5 +90,4 @@ export default function RootLayout() {
   )
 }
 
-const useIsomorphicLayoutEffect =
-  Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect
+export default RootLayout
