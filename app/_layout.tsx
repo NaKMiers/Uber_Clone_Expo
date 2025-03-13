@@ -1,9 +1,11 @@
 import '@/global.scss'
 
+import { tokenCache } from '@/cache'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { setAndroidNavigationBar } from '@/lib/android-navigation-bar'
 import { NAV_THEME } from '@/lib/constants'
 import { useColorScheme } from '@/lib/useColorScheme'
+import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import { useFonts } from 'expo-font'
@@ -22,6 +24,8 @@ const DARK_THEME: Theme = {
   colors: NAV_THEME.dark,
 }
 
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -37,6 +41,10 @@ function RootLayout() {
     'Jakarta-Regular': require('../assets/fonts/PlusJakartaSans-Regular.ttf'),
     'Jakarta-SemiBold': require('../assets/fonts/PlusJakartaSans-SemiBold.ttf'),
   })
+
+  if (!publishableKey) {
+    throw new Error('Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env')
+  }
 
   const hasMounted = React.useRef(false)
   const { colorScheme, isDarkColorScheme } = useColorScheme()
@@ -60,33 +68,40 @@ function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-      <Stack>
-        <Stack.Screen
-          name="index"
-          options={{
-            title: 'Index',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            title: 'Auth',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-        <Stack.Screen
-          name="(root)"
-          options={{
-            title: 'Root',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+    <ClerkProvider
+      tokenCache={tokenCache}
+      publishableKey={publishableKey}
+    >
+      <ClerkLoaded>
+        <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+          <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+          <Stack>
+            <Stack.Screen
+              name="index"
+              options={{
+                title: 'Index',
+                headerRight: () => <ThemeToggle />,
+              }}
+            />
+            <Stack.Screen
+              name="(auth)"
+              options={{
+                title: 'Auth',
+                headerRight: () => <ThemeToggle />,
+              }}
+            />
+            <Stack.Screen
+              name="(root)"
+              options={{
+                title: 'Root',
+                headerRight: () => <ThemeToggle />,
+              }}
+            />
+          </Stack>
+          <PortalHost />
+        </ThemeProvider>
+      </ClerkLoaded>
+    </ClerkProvider>
   )
 }
 

@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button'
+import CustomButton from '@/components/CustomButton'
 import { onboarding } from '@/constants'
-import { useColorScheme } from '@/lib/useColorScheme'
 import { router } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
@@ -11,7 +10,6 @@ function Onboarding() {
   const swiperRef = useRef<any>(null)
   const [activeIndex, setActiveIndex] = useState<number>(0)
   const [isLastSlide, setIsLastSlide] = useState<boolean>(false)
-  const { isDarkColorScheme } = useColorScheme()
 
   return (
     <SafeAreaView
@@ -57,19 +55,12 @@ function Onboarding() {
           </View>
         ))}
       </Swiper>
-      <Button
-        variant="default"
-        className="w-full"
+
+      <CustomButton
+        title={isLastSlide ? 'Get Started' : 'Next'}
         style={{ maxWidth: '90%' }}
         onPress={() => (isLastSlide ? router.replace('/(auth)/sign-up') : swiperRef.current.scrollBy(1))}
-      >
-        <Text
-          className="font-semibold"
-          style={{ color: isDarkColorScheme ? '#111' : '#fff' }}
-        >
-          {isLastSlide ? 'Get Started' : 'Next'}
-        </Text>
-      </Button>
+      />
     </SafeAreaView>
   )
 }
